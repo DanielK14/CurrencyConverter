@@ -1,11 +1,11 @@
-﻿using System.Data;
+﻿using System;
+using System.Configuration;
+using System.Data;
+using System.Data.SqlClient;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Data.SqlClient;
-using System;
-using System.Configuration;
 
 namespace CurrencyConverter_Static
 {
@@ -42,10 +42,8 @@ namespace CurrencyConverter_Static
 
             sqlCmd = new SqlCommand("select Id, CurrencyName from Currency_Master", sqlConnection);
 
-            //CommandType define which type of command we use for write a query
             sqlCmd.CommandType = CommandType.Text;
 
-            //It accepts a parameter that contains the command text of the object's selectCommand property.
             sqlDataAdapter = new SqlDataAdapter(sqlCmd);
 
             sqlDataAdapter.Fill(dtCurrency);
@@ -60,32 +58,21 @@ namespace CurrencyConverter_Static
 
             if (dtCurrency != null && dtCurrency.Rows.Count > 0)
             {
-                //Assign the datatable data to from currency combobox using ItemSource property.
                 cmbFromCurrency.ItemsSource = dtCurrency.DefaultView;
 
-                //Assign the datatable data to to currency combobox using ItemSource property.
                 cmbToCurrency.ItemsSource = dtCurrency.DefaultView;
             }
             sqlConnection.Close();
 
-            //To display the underlying datasource for cmbFromCurrency
-            cmbFromCurrency.DisplayMemberPath = "CurrencyName";
+           cmbFromCurrency.DisplayMemberPath = "CurrencyName";
 
-            //To use as the actual value for the items
             cmbFromCurrency.SelectedValuePath = "Id";
 
-            //Show default item in combobox
             cmbFromCurrency.SelectedValue = 0;
 
             cmbToCurrency.DisplayMemberPath = "CurrencyName";
             cmbToCurrency.SelectedValuePath = "Id";
             cmbToCurrency.SelectedValue = 0;
-
-            /*
-             * 
-            dtCurrency.Rows.Add("PokéYen", 0.015);
-            dtCurrency.Rows.Add("Imperial Credits", 0.0267);
-            */
         }
 
         private void Convert_Click(object sender, RoutedEventArgs e)
@@ -255,35 +242,25 @@ namespace CurrencyConverter_Static
 
         public void GetData()
         {
-            //The method is used for connect with database and open database connection    
             mycon();
-
-            //Create Datatable object
             DataTable dt = new DataTable();
 
-            //Write Sql Query for Get data from database table. Query written in double quotes and after comma provide connection    
             sqlCmd = new SqlCommand("SELECT * FROM Currency_Master", sqlConnection);
 
-            //CommandType define Which type of command execute like Text, StoredProcedure, TableDirect.    
             sqlCmd.CommandType = CommandType.Text;
 
-            //It is accept a parameter that contains the command text of the object's SelectCommand property.
             sqlDataAdapter = new SqlDataAdapter(sqlCmd);
 
-            //The DataAdapter serves as a bridge between a DataSet and a data source for retrieving and saving data. The Fill operation then adds the rows to destination DataTable objects in the DataSet    
             sqlDataAdapter.Fill(dt);
 
-            //dt is not null and rows count greater than 0
             if (dt != null && dt.Rows.Count > 0)
             {
-                //Assign DataTable data to dgvCurrency using ItemSource property.   
                 dgvCurrency.ItemsSource = dt.DefaultView;
             }
             else
             {
                 dgvCurrency.ItemsSource = null;
             }
-            //Database connection Close
             sqlConnection.Close();
         }
 
@@ -292,7 +269,6 @@ namespace CurrencyConverter_Static
             try
             {
                 DataGrid grd = (DataGrid)sender;
-
                 DataRowView row_selected = grd.CurrentItem as DataRowView;
 
                 if (row_selected != null)
@@ -314,17 +290,14 @@ namespace CurrencyConverter_Static
                             //DisplayIndex is equal to one in the deleted cell
                             if (grd.SelectedCells[0].Column.DisplayIndex == 1)
                             {
-                                //Show confirmation dialog box
                                 if (MessageBox.Show("Are you sure you want to delete ?", "Information", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
                                 {
                                     mycon();
                                     DataTable dt = new DataTable();
 
-                                    //Execute delete query to delete record from table using Id
                                     sqlCmd = new SqlCommand("DELETE FROM Currency_Master WHERE Id = @Id", sqlConnection);
                                     sqlCmd.CommandType = CommandType.Text;
 
-                                    //CurrencyId set in @Id parameter and send it in delete statement
                                     sqlCmd.Parameters.AddWithValue("@Id", currencyId);
                                     sqlCmd.ExecuteNonQuery();
                                     sqlConnection.Close();
@@ -357,7 +330,7 @@ namespace CurrencyConverter_Static
                     sqlCmd = new SqlCommand("SELECT Amount FROM Currency_Master WHERE Id = @CurrencyFromId", sqlConnection);
                     sqlCmd.CommandType = CommandType.Text;
 
-                    if (CurrencyFromId != null && CurrencyFromId != 0)
+                    if (CurrencyFromId != 0)
                         sqlCmd.Parameters.AddWithValue("@CurrencyFromId", CurrencyFromId);
 
                     sqlDataAdapter = new SqlDataAdapter(sqlCmd);
@@ -391,7 +364,7 @@ namespace CurrencyConverter_Static
                     sqlCmd = new SqlCommand("SELECT Amount FROM Currency_Master WHERE Id = @CurrencyToId", sqlConnection);
                     sqlCmd.CommandType = CommandType.Text;
 
-                    if (CurrencyToId != null && CurrencyToId != 0)
+                    if (CurrencyToId != 0)
                         //CurrencyToId set in @CurrencyToId parameter and send parameter in our query
                         sqlCmd.Parameters.AddWithValue("@CurrencyToId", CurrencyToId);
 
